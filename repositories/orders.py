@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -39,8 +39,9 @@ class SQLAOrderRepository:
         return order.id
         
     async def get_one(self, session: AsyncSession, order_id: int) -> Order | None:
-        stmt = select(Order).where(Order.id == order_id
-            ).options(selectinload(Order.content).selectinload(OrdersProducts.product))
+        stmt = select(Order).where(Order.id == order_id).options(
+            selectinload(Order.content).selectinload(OrdersProducts.product)
+        )
         order = (await session.execute(stmt)).scalars().one_or_none()
 
         return order
@@ -53,11 +54,23 @@ class SQLAOrderRepository:
         self, session: AsyncSession, order_id: int, 
         product_name: str, quantity: int
     ):
-        row = OrdersProducts(
-            order_id=order_id, 
-            product_name=product_name, 
-            quantity=quantity
+        sel_stmt = select(OrdersProducts).where(
+            OrdersProducts.order_id == order_id,
+            OrdersProducts.product_name == product_name
         )
-        session.add(row)
+        row_in_db = (await session.execute(sel_stmt)).scalars().one_or_none()
+        if row_in_db is not None:
+            await session.execute(update(OrdersProducts), [
+                {"order_id": row_in_db.order_id,
+                 "product_name": row_in_db.product_name,
+                 "quantity": row_in_db.quantity + quantity}
+            ])
+        else:
+            row = OrdersProducts(
+                order_id=order_id, 
+                product_name=product_name, 
+                quantity=quantity
+            )
+            session.add(row)
         await session.commit()
 
