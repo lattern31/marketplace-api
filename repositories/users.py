@@ -46,3 +46,4 @@ class SQLAUserRepository:
 
         response = await session.execute(stmt)
         return response.one_or_none() is not None
+

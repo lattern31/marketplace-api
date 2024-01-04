@@ -3,10 +3,11 @@ from fastapi.routing import APIRouter
 from starlette import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.deps import get_async_session, get_order_repository, get_user_repository
+from api.deps import get_async_session, get_order_repository, get_user_repository, get_product_repository
 from api.schemas.orders import OrderAddItemSchema, OrderCreateSchema, OrderCreateResponseSchema, OrderResponseSchema
 from repositories.orders import IOrderRepository
 from repositories.users import IUserRepository
+from repositories.products import IProductRepository
 
 
 router = APIRouter(prefix='/orders', tags=['orders'])
@@ -69,13 +70,28 @@ async def add_item_handler(
     order_add_item_schema: OrderAddItemSchema,
     session: AsyncSession = Depends(get_async_session),
     order_repository: IOrderRepository = Depends(get_order_repository),
+    product_repository: IProductRepository = Depends(get_product_repository),
 ):
+    if not await order_repository.check_exists_by_id(
+        session=session,
+        id=order_add_item_schema.order_id
+    ):
+        error_msg = "order doesn't exist"
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error_msg)
+    if not await product_repository.check_exists_by_name(
+        session=session,
+        name=order_add_item_schema.product_name
+    ):
+        error_msg = "product doesn't exist"
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error_msg)
+        
     await order_repository.add_product(
         session=session,
         **order_add_item_schema.dict(),
     )
     resp = await order_repository.get_one(
-        session=session, order_id=order_add_item_schema.order_id)
+        session=session, order_id=order_add_item_schema.order_id
+    )
 
     return resp
 

@@ -14,10 +14,14 @@ class IOrderRepository(Protocol):
     ) -> Order:
         ...
 
-    async def get_one(self, session: AsyncSession, order_id: int) -> Order:
+    async def get_one(
+        self, session: AsyncSession, order_id: int
+    ) -> Order:
         ...
 
-    async def status_update(self, session: AsyncSession, status: OrderStatus):
+    async def status_update(
+        self, session: AsyncSession, status: OrderStatus
+    ):
         ...
 
     async def add_product(
@@ -25,7 +29,9 @@ class IOrderRepository(Protocol):
         product_id: int, quantity: int
     ):
         ...
-    #TODO check_if_exists_by_id
+
+    async def check_exists_by_id(self, session: AsyncSession, id: int) -> bool:
+        ...
 
 
 class SQLAOrderRepository:
@@ -38,7 +44,9 @@ class SQLAOrderRepository:
         await session.commit()
         return order.id
         
-    async def get_one(self, session: AsyncSession, order_id: int) -> Order | None:
+    async def get_one(
+        self, session: AsyncSession, order_id: int
+    ) -> Order | None:
         stmt = select(Order).where(Order.id == order_id).options(
             selectinload(Order.content).selectinload(OrdersProducts.product)
         )
@@ -47,7 +55,8 @@ class SQLAOrderRepository:
         return order
 
     async def status_update(
-        self, session: AsyncSession, id: int, status: OrderStatus) -> Order:
+        self, session: AsyncSession, id: int, status: OrderStatus
+    ) -> Order:
         ...
 
     async def add_product(
@@ -59,13 +68,13 @@ class SQLAOrderRepository:
             OrdersProducts.product_name == product_name
         )
         row_in_db = (await session.execute(sel_stmt)).scalars().one_or_none()
-        if row_in_db is not None:
+        if row_in_db is not None:  # update row
             await session.execute(update(OrdersProducts), [
                 {"order_id": row_in_db.order_id,
                  "product_name": row_in_db.product_name,
                  "quantity": row_in_db.quantity + quantity}
             ])
-        else:
+        else:  # new row
             row = OrdersProducts(
                 order_id=order_id, 
                 product_name=product_name, 
@@ -74,3 +83,9 @@ class SQLAOrderRepository:
             session.add(row)
         await session.commit()
 
+    async def check_exists_by_id(self, session: AsyncSession, id: int) -> bool:
+        stmt = select(Order).where(Order.id == id)
+
+        response = await session.execute(stmt)
+        return response.one_or_none() is not None
+        
