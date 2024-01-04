@@ -10,6 +10,6 @@ class Base(DeclarativeBase):
 
 async_engine: AsyncEngine = create_async_engine(
     settings.db_string,
-    echo=settings.echo,
+    echo=settings.debug,
 )
 

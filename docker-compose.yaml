@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+  app:
+    container_name: apisc-app
+    build: .
+    command: uvicorn --factory api.app:create_app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - .:/code/
+    environment:
+      POSTGRES_HOST: db
+    networks:
+      - backend
+    ports:
+      - 8000:8000
+    depends_on:
+      - db
+
+  db:
+    container_name: apisc-db
+    image: postgres:latest
+    restart: always
+    env_file:
+      - .env
+    networks:
+      - backend
+    ports:
+      - 5432:5432
+
+volumes:
+  dbdata:
+
+networks:
+  backend:
+    driver: bridge
