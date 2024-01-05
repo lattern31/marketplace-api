@@ -11,4 +11,4 @@ drop-all:
 
 .PHONY: logs
 logs:
-	${DC} -f ${DC_FILE} logs 
+	${DC} -f ${DC_FILE} logs -f
