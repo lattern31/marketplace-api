@@ -10,9 +10,9 @@ def create_app():
         docs_url='/api/docs',
     )
 
-    app.include_router(order_router, prefix='/api/v1')
-    app.include_router(product_router, prefix='/api/v1')
-    app.include_router(user_router, prefix='/api/v1')
+    app.include_router(order_router, prefix='/orders', tags=['orders'])
+    app.include_router(product_router, prefix='/products', tags=['products'])
+    app.include_router(user_router, prefix='/users', tags=['users'])
 
     return app
 

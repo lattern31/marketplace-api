@@ -62,7 +62,7 @@ class SQLAOrderRepository:
     async def add_product(
         self, session: AsyncSession, order_id: int, 
         product_name: str, quantity: int
-    ):
+    ) -> None:
         sel_stmt = select(OrdersProducts).where(
             OrdersProducts.order_id == order_id,
             OrdersProducts.product_name == product_name

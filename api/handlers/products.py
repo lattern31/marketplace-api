@@ -6,12 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from api.deps import get_async_session, get_product_repository
 from api.schemas.products import ProductCreateSchema, ProductResponseSchema
 from repositories.products import IProductRepository 
+from services.products import create_product
 
 
-router = APIRouter(prefix='/products', tags=['products'])
+router = APIRouter()
 
 @router.post(
-    '/',
+    '',
     response_model=ProductCreateSchema,
     operation_id='createProduct',
     summary='Create Product',
@@ -21,25 +22,15 @@ async def create_product_handler(
     session: AsyncSession = Depends(get_async_session),
     product_repository: IProductRepository = Depends(get_product_repository),
 ):
-    if await product_repository.check_exists_by_name(
-        session=session, 
-        name=product_create_schema.name
-    ):
-        error_msg = 'name already taken'
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg)
-
-    product = await product_repository.create(
-        session,
-        name=product_create_schema.name,
-        cost=product_create_schema.cost,
-    )
+    product = await create_product(
+        product_repository, session, **product_create_schema.dict())
 
     return product
 
 @router.get(
-    '/',
+    '',
     response_model=list[ProductResponseSchema],
-    operation_id='fetch_products',
+    operation_id='fetchProducts',
     summary='Fetch products',
 )
 async def fetch_products_handler(

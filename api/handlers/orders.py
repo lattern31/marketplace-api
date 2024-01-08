@@ -8,12 +8,13 @@ from api.schemas.orders import OrderAddItemSchema, OrderCreateSchema, OrderCreat
 from repositories.orders import IOrderRepository
 from repositories.users import IUserRepository
 from repositories.products import IProductRepository
+from services.orders import create_order, add_item_to_order
 
 
-router = APIRouter(prefix='/orders', tags=['orders'])
+router = APIRouter()
 
 @router.post(
-    '/',
+    '',
     response_model=OrderCreateResponseSchema,
     operation_id='createOrder',
     summary='Create order',
@@ -24,24 +25,15 @@ async def create_order_handler(
     order_repository: IOrderRepository = Depends(get_order_repository),
     user_repository: IUserRepository = Depends(get_user_repository),
 ):
-    if not await user_repository.check_exists_by_id(
-        session=session, 
-        id=order_create_schema.user_id
-    ):
-        error_msg = "user doesn't exist"
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=error_msg)
-
-    order_id = await order_repository.create(
-        session,
-        user_id=order_create_schema.user_id,
-    )
-
+    order_id = await create_order(
+        order_repository, user_repository, 
+        session, order_create_schema.user_id)
     return OrderCreateResponseSchema(id=order_id)
 
 @router.get(
-    '/',
+    '/{order_id}',
     response_model=OrderResponseSchema,
-    operation_id='get order',
+    operation_id='getOrder',
     summary='Get Order',
 )
 async def get_order_handler(
@@ -61,9 +53,8 @@ async def get_order_handler(
     return response
 
 @router.post(
-    '/add_item',
-    response_model=OrderResponseSchema,
-    operation_id='add item to order',
+    '/{order_id}/add_item',
+    operation_id='addItemToOrder',
     summary='Add item to order',
 )
 async def add_item_handler(
@@ -72,26 +63,7 @@ async def add_item_handler(
     order_repository: IOrderRepository = Depends(get_order_repository),
     product_repository: IProductRepository = Depends(get_product_repository),
 ):
-    if not await order_repository.check_exists_by_id(
-        session=session,
-        id=order_add_item_schema.order_id
-    ):
-        error_msg = "order doesn't exist"
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error_msg)
-    if not await product_repository.check_exists_by_name(
-        session=session,
-        name=order_add_item_schema.product_name
-    ):
-        error_msg = "product doesn't exist"
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error_msg)
-        
-    await order_repository.add_product(
-        session=session,
-        **order_add_item_schema.dict(),
-    )
-    resp = await order_repository.get_one(
-        session=session, order_id=order_add_item_schema.order_id
-    )
-
-    return resp
+    await add_item_to_order(
+        order_repository, product_repository, session, 
+        **order_add_item_schema.dict())
 
