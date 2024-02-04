@@ -20,6 +20,10 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
+import sys
+print(sys.path[0])
+sys.path = ['', '..'] + sys.path[1:]
+
 from db.base import Base
 from common.settings import settings
 

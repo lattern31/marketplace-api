@@ -22,7 +22,7 @@ jobs:
         run: docker compose -f docker-compose-ci.yaml up -d --build
 
       - name: "sleep for a bit"
-        run: sleep 30
+        run: sleep 10
 
       - name: "install dependencies"
         run: |
