@@ -21,7 +21,6 @@ class OrderResponseSchema(OrderCreateSchema, OrderCreateResponseSchema):
 
 
 class OrderAddItemSchema(BaseModel):
-    order_id: int
     product_name: str
     quantity: int
 

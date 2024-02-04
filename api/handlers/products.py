@@ -23,7 +23,7 @@ async def create_product_handler(
     product_repository: IProductRepository = Depends(get_product_repository),
 ):
     product = await create_product(
-        product_repository, session, **product_create_schema.dict())
+        product_repository, session, **product_create_schema.model_dump())
 
     return product
 

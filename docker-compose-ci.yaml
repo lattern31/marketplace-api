@@ -14,37 +14,22 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - db
-
-  db:
-    container_name: apisc-db
-    image: postgres:latest
-    restart: always
-    volumes:
-      - postgres_data:/var/lib/postgresql/data/
-    env_file:
-      - .env
-    networks:
-      - backend
-    ports:
-      - 5432:5432
+      - db_test
 
   db_test:
     container_name: apisc-db-test
     image: postgres:latest
     restart: always
-    env_file:
-      - .env
     environment:
-      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: db
     networks:
       - backend
     ports:
       - 5433:5432
 
-volumes:
-  postgres_data:
-
 networks:
   backend:
     driver: bridge
+

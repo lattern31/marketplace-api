@@ -58,6 +58,7 @@ async def get_order_handler(
     summary='Add item to order',
 )
 async def add_item_handler(
+    order_id: int,
     order_add_item_schema: OrderAddItemSchema,
     session: AsyncSession = Depends(get_async_session),
     order_repository: IOrderRepository = Depends(get_order_repository),
@@ -65,5 +66,5 @@ async def add_item_handler(
 ):
     await add_item_to_order(
         order_repository, product_repository, session, 
-        **order_add_item_schema.dict())
+        order_id=order_id, **order_add_item_schema.model_dump())
 

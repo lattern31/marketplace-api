@@ -1,0 +1,31 @@
+name: Docker API Tests
+
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - used: actions/checkout@v4
+      
+      - name: "build and start containers"
+        run: docker compose -f docker-compose-ci.yaml up -d --build
+
+      - name: "sleep for a bit"
+        run: sleep 30
+
+      - name: "install dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install --no-root --no-interaction --no-ansi
+
+      - name: "run tests"
+        run: pytest
