@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - used: actions/checkout@v4
+      - uses: actions/checkout@v4
       
       - name: "build and start containers"
         run: docker compose -f docker-compose-ci.yaml up -d --build
