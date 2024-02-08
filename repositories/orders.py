@@ -8,45 +8,40 @@ from models.orders import Order, OrdersProducts, OrderStatus
 
 
 class IOrderRepository(Protocol):
-    async def create(
-        self, session: AsyncSession, owner_id: int, 
-        status: OrderStatus = OrderStatus.PENDING
-    ) -> Order:
+    async def create(self, session: AsyncSession,
+                     user_id: int,
+                     status: OrderStatus = OrderStatus.PENDING) -> int:
         ...
 
-    async def get_one(
-        self, session: AsyncSession, order_id: int
-    ) -> Order:
+    async def get_one(self, session: AsyncSession,
+                      order_id: int) -> Order | None:
         ...
 
-    async def status_update(
-        self, session: AsyncSession, status: OrderStatus
-    ):
+    async def status_update(self, session: AsyncSession,
+                            order_id: int, status: OrderStatus) -> None:
         ...
 
-    async def add_product(
-        self, session: AsyncSession, order_id: int,
-        product_id: int, quantity: int
-    ):
+    async def add_product(self, session: AsyncSession,
+                          order_id: int, product_name: str,
+                          quantity: int) -> None:
         ...
 
-    async def check_exists_by_id(self, session: AsyncSession, id: int) -> bool:
+    async def check_exists_by_id(self, session: AsyncSession,
+                                 order_id: int) -> bool:
         ...
 
 
 class SQLAOrderRepository:
-    async def create(
-        self, session: AsyncSession, user_id: int, 
-        status: OrderStatus = OrderStatus.PENDING
-    ) -> int:
+    async def create(self, session: AsyncSession,
+                     user_id: int,
+                     status: OrderStatus = OrderStatus.PENDING) -> int:
         order = Order(user_id=user_id, status=status)
         session.add(order)
         await session.commit()
         return order.id
-        
-    async def get_one(
-        self, session: AsyncSession, order_id: int
-    ) -> Order | None:
+
+    async def get_one(self, session: AsyncSession,
+                      order_id: int) -> Order | None:
         stmt = select(Order).where(Order.id == order_id).options(
             selectinload(Order.content).selectinload(OrdersProducts.product)
         )
@@ -54,15 +49,13 @@ class SQLAOrderRepository:
 
         return order
 
-    async def status_update(
-        self, session: AsyncSession, id: int, status: OrderStatus
-    ) -> Order:
+    async def status_update(self, session: AsyncSession,
+                            order_id: int, status: OrderStatus) -> None:
         ...
 
-    async def add_product(
-        self, session: AsyncSession, order_id: int, 
-        product_name: str, quantity: int
-    ) -> None:
+    async def add_product(self, session: AsyncSession,
+                          order_id: int, product_name: str,
+                          quantity: int) -> None:
         sel_stmt = select(OrdersProducts).where(
             OrdersProducts.order_id == order_id,
             OrdersProducts.product_name == product_name
@@ -76,16 +69,16 @@ class SQLAOrderRepository:
             ])
         else:  # new row
             row = OrdersProducts(
-                order_id=order_id, 
-                product_name=product_name, 
+                order_id=order_id,
+                product_name=product_name,
                 quantity=quantity
             )
             session.add(row)
         await session.commit()
 
-    async def check_exists_by_id(self, session: AsyncSession, id: int) -> bool:
+    async def check_exists_by_id(self, session: AsyncSession,
+                                 id: int) -> bool:
         stmt = select(Order).where(Order.id == id)
 
         response = await session.execute(stmt)
         return response.one_or_none() is not None
-        

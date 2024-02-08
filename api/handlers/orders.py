@@ -1,10 +1,12 @@
-from fastapi import Depends, HTTPException, Query
+from fastapi import Depends, HTTPException
 from fastapi.routing import APIRouter
 from starlette import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api.deps import get_async_session, get_order_repository, get_user_repository, get_product_repository
-from api.schemas.orders import OrderAddItemSchema, OrderCreateSchema, OrderCreateResponseSchema, OrderResponseSchema
+from api.deps import (get_async_session, get_order_repository,
+                      get_user_repository, get_product_repository)
+from api.schemas.orders import (OrderAddItemSchema, OrderCreateSchema,
+                                OrderCreateResponseSchema, OrderResponseSchema)
 from repositories.orders import IOrderRepository
 from repositories.users import IUserRepository
 from repositories.products import IProductRepository
@@ -12,6 +14,7 @@ from services.orders import create_order, add_item_to_order
 
 
 router = APIRouter()
+
 
 @router.post(
     '',
@@ -26,9 +29,10 @@ async def create_order_handler(
     user_repository: IUserRepository = Depends(get_user_repository),
 ):
     order_id = await create_order(
-        order_repository, user_repository, 
+        order_repository, user_repository,
         session, order_create_schema.user_id)
     return OrderCreateResponseSchema(id=order_id)
+
 
 @router.get(
     '/{order_id}',
@@ -48,9 +52,10 @@ async def get_order_handler(
 
     if response is None:
         error_msg = "order doesn't exist"
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=error_msg)
-
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=error_msg)
     return response
+
 
 @router.post(
     '/{order_id}/add_item',
@@ -65,6 +70,5 @@ async def add_item_handler(
     product_repository: IProductRepository = Depends(get_product_repository),
 ):
     await add_item_to_order(
-        order_repository, product_repository, session, 
+        order_repository, product_repository, session,
         order_id=order_id, **order_add_item_schema.model_dump())
-

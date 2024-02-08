@@ -15,4 +15,3 @@ def create_app():
     app.include_router(user_router, prefix='/users', tags=['users'])
 
     return app
-

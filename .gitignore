@@ -1,5 +1,5 @@
 .env
 __pycache__
 .pytest_cache
-migrations/prod/*
-migrations/test/*
+migrations/prod/
+migrations/test/

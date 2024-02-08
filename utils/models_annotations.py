@@ -10,4 +10,3 @@ strpk = Annotated[str, mapped_column(primary_key=True)]
 created_at = Annotated[datetime, mapped_column(
     server_default=text("TIMEZONE('utc', now())")
 )]
-

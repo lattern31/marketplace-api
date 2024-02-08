@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Any
 
 from pydantic import BaseModel
 
-from api.schemas.products import ProductCreateSchema, ProductInOrderSchema
+from api.schemas.products import ProductInOrderSchema
+from models.orders import OrderStatus
 
 
 class OrderCreateSchema(BaseModel):
@@ -15,7 +15,7 @@ class OrderCreateResponseSchema(BaseModel):
 
 
 class OrderResponseSchema(OrderCreateSchema, OrderCreateResponseSchema):
-    status: str
+    status: OrderStatus
     content: list[ProductInOrderSchema]
     created_at: datetime
 
@@ -23,4 +23,3 @@ class OrderResponseSchema(OrderCreateSchema, OrderCreateResponseSchema):
 class OrderAddItemSchema(BaseModel):
     product_name: str
     quantity: int
-

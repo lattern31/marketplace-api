@@ -12,8 +12,11 @@ class ProductResponseSchema(ProductCreateSchema):
     created_at: datetime
 
 
+class ProductCreateResponseSchema(BaseModel):
+    name: str
+
+
 class ProductInOrderSchema(BaseModel):
     product_name: str
     cost: int
     quantity: int
-

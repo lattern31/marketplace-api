@@ -1,19 +1,21 @@
-from fastapi import Depends, HTTPException, Query
+from fastapi import Depends, Query
 from fastapi.routing import APIRouter
-from starlette import status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.deps import get_async_session, get_product_repository
-from api.schemas.products import ProductCreateSchema, ProductResponseSchema
-from repositories.products import IProductRepository 
+from api.schemas.products import (ProductCreateSchema,
+                                  ProductCreateResponseSchema,
+                                  ProductResponseSchema)
+from repositories.products import IProductRepository
 from services.products import create_product
 
 
 router = APIRouter()
 
+
 @router.post(
     '',
-    response_model=ProductCreateSchema,
+    response_model=ProductCreateResponseSchema,
     operation_id='createProduct',
     summary='Create Product',
 )
@@ -25,7 +27,8 @@ async def create_product_handler(
     product = await create_product(
         product_repository, session, **product_create_schema.model_dump())
 
-    return product
+    return {'name': product.name}
+
 
 @router.get(
     '',
@@ -46,4 +49,3 @@ async def fetch_products_handler(
         name=name,
     )
     return response
-

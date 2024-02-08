@@ -11,3 +11,6 @@ class UserResponseSchema(UserCreateSchema):
     id: int
     created_at: datetime
 
+
+class UserCreateResponseSchema(BaseModel):
+    id: int

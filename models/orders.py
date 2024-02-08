@@ -1,6 +1,6 @@
-from enum import auto, Enum
+from enum import auto, StrEnum
 
-from sqlalchemy import ForeignKey 
+from sqlalchemy import ForeignKey
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -8,7 +8,7 @@ from db.db import Base
 from utils.models_annotations import created_at, intpk
 
 
-class OrderStatus(Enum):
+class OrderStatus(StrEnum):
     PENDING = auto()
     CHECKOUT = auto()
     SHIPPING = auto()
@@ -43,4 +43,3 @@ class OrdersProducts(Base):
     product: Mapped["Product"] = relationship()
     cost: AssociationProxy[int] = association_proxy(
         'product', 'cost')
-

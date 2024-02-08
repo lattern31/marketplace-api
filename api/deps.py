@@ -10,6 +10,7 @@ from repositories.users import SQLAUserRepository
 
 async_session = async_sessionmaker(async_engine, expire_on_commit=False)
 
+
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     try:
         session: AsyncSession = async_session()
@@ -28,4 +29,3 @@ def get_product_repository():
 
 def get_order_repository():
     return SQLAOrderRepository()
-

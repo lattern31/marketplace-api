@@ -6,13 +6,23 @@ from models.users import User
 from repositories.users import IUserRepository
 
 
+async def create_user(
+    repository: IUserRepository,
+    session: AsyncSession,
+    username: str,
+) -> User:
+    await is_valid_username(repository, session, username)
+    user = await repository.create(session, username)
+    return user
+
+
 async def user_exists(
     repository: IUserRepository,
     session: AsyncSession,
     id: int,
 ) -> None:
     if not await repository.check_exists_by_id(
-        session=session, id=id
+        session=session, user_id=id
     ):
         error_msg = "user doesn't exist"
         raise HTTPException(
@@ -20,11 +30,12 @@ async def user_exists(
             detail=error_msg
         )
 
-async def create_user(
+
+async def is_valid_username(
     repository: IUserRepository,
     session: AsyncSession,
     username: str,
-) -> User:
+) -> None:
     if await repository.check_exists_by_username(
         session=session, username=username
     ):
@@ -33,6 +44,3 @@ async def create_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=error_msg
         )
-    user = await repository.create(session, username)
-    return user
-
