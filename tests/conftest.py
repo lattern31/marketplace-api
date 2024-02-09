@@ -154,3 +154,19 @@ async def create_order_in_db(get_async_sessionmaker) -> int:
                      'now': datetime.utcnow()})
                 ).scalar()
     return create_order_in_db
+
+
+@pytest.fixture
+async def add_item_to_order(get_async_sessionmaker) -> int:
+    async def add_item_to_order(order_id: int, product_name: str,
+                                quantity: int):
+        async with get_async_sessionmaker() as session:
+            async with session.begin():
+                await session.execute(
+                    text("""insert into orders_products
+                    (order_id, product_name, quantity)
+                    values (:order_id, :product_name, :quantity)"""),
+                    {'order_id': order_id,
+                    'product_name': product_name,
+                     'quantity': quantity})
+    return add_item_to_order

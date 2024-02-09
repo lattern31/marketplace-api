@@ -23,3 +23,11 @@ class OrderResponseSchema(OrderCreateSchema, OrderCreateResponseSchema):
 class OrderAddItemSchema(BaseModel):
     product_name: str
     quantity: int
+
+
+class OrderDeleteItemSchema(BaseModel):
+    product_name: str
+
+
+class OrderUpdateStatusSchema(BaseModel):
+    status: OrderStatus

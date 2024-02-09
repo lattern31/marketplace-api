@@ -32,8 +32,22 @@ async def add_item_to_order(
     await product_exists(product_repository, session, product_name)
     is_valid_quantity(quantity)
 
-    await order_repository.add_product(
-        session, order_id, product_name, quantity)
+    await order_repository.add_product(session, order_id,
+                                       product_name, quantity)
+
+
+async def delete_item_from_order(
+    order_repository: IOrderRepository,
+    product_repository: IProductRepository,
+    session: AsyncSession,
+    order_id: int,
+    product_name: str,
+) -> None:
+    await order_exists(order_repository, session, order_id)
+    await product_exists(product_repository, session, product_name)
+    await is_product_in_order(order_repository, session,
+                              order_id, product_name)
+    await order_repository.delete_product(session, order_id, product_name)
 
 
 async def order_exists(
@@ -43,6 +57,22 @@ async def order_exists(
 ) -> None:
     if not await order_repository.check_exists_by_id(session, order_id):
         error_msg = "order doesn't exist"
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=error_msg
+        )
+
+
+async def is_product_in_order(
+    order_repository: IOrderRepository,
+    session: AsyncSession,
+    order_id: int,
+    product_name: str,
+) -> None:
+    if not await order_repository.is_product_in_order(session,
+                                                      order_id,
+                                                      product_name):
+        error_msg = "product is not in order"
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=error_msg

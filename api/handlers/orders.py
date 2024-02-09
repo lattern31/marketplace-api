@@ -5,12 +5,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from api.deps import (get_async_session, get_order_repository,
                       get_user_repository, get_product_repository)
-from api.schemas.orders import (OrderAddItemSchema, OrderCreateSchema,
-                                OrderCreateResponseSchema, OrderResponseSchema)
+from api.schemas.orders import (OrderCreateSchema, OrderCreateResponseSchema,
+                                OrderResponseSchema, OrderAddItemSchema,
+                                OrderDeleteItemSchema, OrderUpdateStatusSchema)
 from repositories.orders import IOrderRepository
 from repositories.users import IUserRepository
 from repositories.products import IProductRepository
-from services.orders import create_order, add_item_to_order
+from services.orders import (create_order, add_item_to_order,
+                             delete_item_from_order)
 
 
 router = APIRouter()
@@ -58,7 +60,7 @@ async def get_order_handler(
 
 
 @router.post(
-    '/{order_id}/add_item',
+    '/{order_id}/item',
     operation_id='addItemToOrder',
     summary='Add item to order',
 )
@@ -69,6 +71,37 @@ async def add_item_handler(
     order_repository: IOrderRepository = Depends(get_order_repository),
     product_repository: IProductRepository = Depends(get_product_repository),
 ):
-    await add_item_to_order(
-        order_repository, product_repository, session,
-        order_id=order_id, **order_add_item_schema.model_dump())
+    await add_item_to_order(order_repository, product_repository,
+                            session, order_id=order_id,
+                            **order_add_item_schema.model_dump())
+
+
+@router.delete(
+    '/{order_id}/item/{item_id}',
+    operation_id='deleteItemFromOrder',
+    summary='Delete item from order',
+)
+async def delete_item_handler(
+    order_id: int,
+    item_id: str,
+    session: AsyncSession = Depends(get_async_session),
+    order_repository: IOrderRepository = Depends(get_order_repository),
+    product_repository: IProductRepository = Depends(get_product_repository),
+):
+    await delete_item_from_order(order_repository, product_repository,
+                                 session, order_id, item_id)
+
+
+@router.patch(
+    '/{order_id}/status',
+    operation_id='updateOrderStatus',
+    summary='Update Order status',
+)
+async def update_status_handler(
+    order_id: int,
+    order_update_status_schema: OrderUpdateStatusSchema,
+    session: AsyncSession = Depends(get_async_session),
+    order_repository: IOrderRepository = Depends(get_order_repository),
+):
+    await order_repository.update_status(session, order_id,
+                                         order_update_status_schema.status)
