@@ -7,7 +7,7 @@ from models.orders import OrderStatus
 
 
 class OrderCreateSchema(BaseModel):
-    user_id: int
+    owner_id: int
 
 
 class OrderCreateResponseSchema(BaseModel):
@@ -21,12 +21,12 @@ class OrderResponseSchema(OrderCreateSchema, OrderCreateResponseSchema):
 
 
 class OrderAddItemSchema(BaseModel):
-    product_name: str
+    product_id: int
     quantity: int
 
 
 class OrderDeleteItemSchema(BaseModel):
-    product_name: str
+    product_title: str
 
 
 class OrderUpdateStatusSchema(BaseModel):

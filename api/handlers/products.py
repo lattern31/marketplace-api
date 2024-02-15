@@ -24,10 +24,10 @@ async def create_product_handler(
     session: AsyncSession = Depends(get_async_session),
     product_repository: IProductRepository = Depends(get_product_repository),
 ):
-    product = await create_product(
-        product_repository, session, **product_create_schema.model_dump())
+    product_id = await create_product(product_repository, session,
+                                      **product_create_schema.model_dump())
 
-    return {'name': product.name}
+    return {'id': product_id}
 
 
 @router.get(
@@ -39,13 +39,10 @@ async def create_product_handler(
 async def fetch_products_handler(
     session: AsyncSession = Depends(get_async_session),
     product_repository: IProductRepository = Depends(get_product_repository),
-    name: str = Query(
+    title: str = Query(
         default=None,
-        description="Search by product name",
+        description="Search by product title",
     )
 ):
-    response = await product_repository.fetch(
-        session=session,
-        name=name,
-    )
+    response = await product_repository.fetch(session, title)
     return response

@@ -1,22 +1,24 @@
 from datetime import datetime
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class ProductCreateSchema(BaseModel):
-    name: str
+    title: str
     cost: int
 
 
 class ProductResponseSchema(ProductCreateSchema):
+    id: int
     created_at: datetime
 
 
 class ProductCreateResponseSchema(BaseModel):
-    name: str
+    id: int
 
 
 class ProductInOrderSchema(BaseModel):
-    product_name: str
+    id: int = Field(validation_alias='product_id')
+    title: str
     cost: int
     quantity: int

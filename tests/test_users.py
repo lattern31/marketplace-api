@@ -3,7 +3,7 @@ import datetime
 
 
 async def test_create_user(client, get_user_from_db):
-    resp = client.post('/users', data=json.dumps({'username': 'test_name'}))
+    resp = client.post('/users', content=json.dumps({'username': 'test_name'}))
     resp_body = resp.json()
     assert resp.status_code == 200
     users = await get_user_from_db(resp_body['id'])
@@ -14,9 +14,9 @@ async def test_create_user(client, get_user_from_db):
 
 
 async def test_create_user_duplicate_username(client, get_user_from_db):
-    resp = client.post('/users', data=json.dumps({'username': 'test_name1'}))
+    resp = client.post('/users', content=json.dumps({'username': 'test_name1'}))
     assert resp.status_code == 200
-    resp = client.post('/users', data=json.dumps({'username': 'test_name1'}))
+    resp = client.post('/users', content=json.dumps({'username': 'test_name1'}))
     assert resp.status_code == 400
     assert resp.json()['detail'] == 'username already taken'
 

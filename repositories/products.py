@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from sqlalchemy import select
+from sqlalchemy import select, insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models.products import Product
@@ -8,38 +8,39 @@ from models.products import Product
 
 class IProductRepository(Protocol):
     async def create(self, session: AsyncSession,
-                     name: str, cost: int) -> Product:
+                     title: str, cost: int) -> int:
         ...
 
     async def fetch(self, session: AsyncSession,
-                    name: str) -> list[Product]:
+                    title: str) -> list[Product]:
         ...
 
-    async def check_exists_by_name(self, session: AsyncSession,
-                                   name: str) -> bool:
+    async def check_exists_by_id(self, session: AsyncSession,
+                                 id: int) -> bool:
         ...
 
 
 class SQLAProductRepository:
     async def create(self, session: AsyncSession,
-                     name: str, cost: int) -> Product:
-        product = Product(name=name, cost=cost)
-        session.add(product)
+                     title: str, cost: int) -> int:
+        stmt = insert(Product).returning(Product.id)
+        product_id = await session.execute(stmt, {'title': title,
+                                                  'cost': cost})
         await session.commit()
-        return product
+        return product_id.scalar()
 
     async def fetch(self, session: AsyncSession,
-                    name: str | None = None) -> list[Product]:
+                    title: str | None = None) -> list[Product]:
         stmt = select(Product)
-        if name is not None:
-            stmt = stmt.where(Product.name.like(f"%{name}%"))
+        if title is not None:
+            stmt = stmt.where(Product.title.like(f"%{title}%"))
 
         results = (await session.execute(stmt)).scalars().all()
         return results
 
-    async def check_exists_by_name(self, session: AsyncSession,
-                                   name: str) -> bool:
-        stmt = select(Product).where(Product.name == name)
+    async def check_exists_by_id(self, session: AsyncSession,
+                                 id: int) -> bool:
+        stmt = select(Product).where(Product.id == id)
 
         response = await session.execute(stmt)
         return response.one_or_none() is not None

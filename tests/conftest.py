@@ -73,25 +73,25 @@ async def clean_tables(get_async_sessionmaker):
 
 @pytest.fixture
 async def get_product_from_db(get_async_sessionmaker):
-    async def get_product_from_db_by_name(product_name: str):
+    async def get_product_from_db_by_id(product_id: int):
         async with get_async_sessionmaker() as session:
             return (await session.execute(
-                text("select * from products where name = :product_name"),
-                {'product_name': product_name})
+                text("select * from products where id = :product_id"),
+                {'product_id': product_id})
                 ).all()
-    return get_product_from_db_by_name
+    return get_product_from_db_by_id
 
 
 @pytest.fixture
-async def create_product_in_db(get_async_sessionmaker) -> str:
-    async def create_product_in_db(product_name: str, cost: int):
+async def create_product_in_db(get_async_sessionmaker) -> int:
+    async def create_product_in_db(title: str, cost: int):
         async with get_async_sessionmaker() as session:
             async with session.begin():
                 return (await session.execute(
-                    text("""insert into products (name, cost, created_at)
-                    values (:product_name, :cost, :now)
-                    returning products.name"""),
-                    {"product_name": product_name,
+                    text("""insert into products (title, cost, created_at)
+                    values (:title, :cost, :now)
+                    returning products.id"""),
+                    {"title": title,
                      'cost': cost,
                      'now': datetime.utcnow()})
                 ).scalar()
@@ -147,10 +147,10 @@ async def create_order_in_db(get_async_sessionmaker) -> int:
         async with get_async_sessionmaker() as session:
             async with session.begin():
                 return (await session.execute(
-                    text("""insert into orders (user_id, status, created_at)
-                    values (:user_id, 'PENDING', :now)
+                    text("""insert into orders (owner_id, status, created_at)
+                    values (:owner_id, 'PENDING', :now)
                     returning orders.id"""),
-                    {'user_id': user_id,
+                    {'owner_id': user_id,
                      'now': datetime.utcnow()})
                 ).scalar()
     return create_order_in_db
@@ -158,15 +158,15 @@ async def create_order_in_db(get_async_sessionmaker) -> int:
 
 @pytest.fixture
 async def add_item_to_order(get_async_sessionmaker) -> int:
-    async def add_item_to_order(order_id: int, product_name: str,
+    async def add_item_to_order(order_id: int, product_id: int,
                                 quantity: int):
         async with get_async_sessionmaker() as session:
             async with session.begin():
                 await session.execute(
                     text("""insert into orders_products
-                    (order_id, product_name, quantity)
-                    values (:order_id, :product_name, :quantity)"""),
+                    (order_id, product_id, quantity)
+                    values (:order_id, :product_id, :quantity)"""),
                     {'order_id': order_id,
-                    'product_name': product_name,
+                     'product_id': product_id,
                      'quantity': quantity})
     return add_item_to_order

@@ -7,7 +7,7 @@ from api.deps import (get_async_session, get_order_repository,
                       get_user_repository, get_product_repository)
 from api.schemas.orders import (OrderCreateSchema, OrderCreateResponseSchema,
                                 OrderResponseSchema, OrderAddItemSchema,
-                                OrderDeleteItemSchema, OrderUpdateStatusSchema)
+                                OrderUpdateStatusSchema)
 from repositories.orders import IOrderRepository
 from repositories.users import IUserRepository
 from repositories.products import IProductRepository
@@ -32,7 +32,7 @@ async def create_order_handler(
 ):
     order_id = await create_order(
         order_repository, user_repository,
-        session, order_create_schema.user_id)
+        session, order_create_schema.owner_id)
     return OrderCreateResponseSchema(id=order_id)
 
 
@@ -83,7 +83,7 @@ async def add_item_handler(
 )
 async def delete_item_handler(
     order_id: int,
-    item_id: str,
+    item_id: int,
     session: AsyncSession = Depends(get_async_session),
     order_repository: IOrderRepository = Depends(get_order_repository),
     product_repository: IProductRepository = Depends(get_product_repository),

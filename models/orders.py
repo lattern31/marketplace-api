@@ -20,7 +20,7 @@ class Order(Base):
     __tablename__ = "orders"
 
     id: Mapped[intpk]
-    user_id: Mapped[int] = mapped_column(
+    owner_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE")
     )
     status: Mapped[OrderStatus]
@@ -35,11 +35,13 @@ class OrdersProducts(Base):
         ForeignKey("orders.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    product_name: Mapped[str] = mapped_column(
-        ForeignKey("products.name", ondelete="CASCADE"),
+    product_id: Mapped[int] = mapped_column(
+        ForeignKey("products.id", ondelete="CASCADE"),
         primary_key=True,
     )
     quantity: Mapped[int]
     product: Mapped["Product"] = relationship()
     cost: AssociationProxy[int] = association_proxy(
         'product', 'cost')
+    title: AssociationProxy[int] = association_proxy(
+        'product', 'title')
