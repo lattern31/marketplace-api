@@ -7,7 +7,7 @@ all:
 	${DC} -f ${DC_FILE} up -d
 
 .PHONY: drop
-all-drop:
+drop-all:
 	${DC} -f ${DC_FILE} down
 
 .PHONY: ci
@@ -15,7 +15,7 @@ ci:
 	${DC} -f ${DC_CI_FILE} up -d
 
 .PHONY: ci
-ci-drop:
+drop-ci:
 	${DC} -f ${DC_CI_FILE} down
 
 .PHONY: logs

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>~/sht/shopping-cart-api/api/handlers/sellers.py.html</title>
+<meta name="Generator" content="Vim/9.1">
+<meta name="plugin-version" content="vim9.0_v2">
+<meta name="syntax" content="python">
+<meta name="settings" content="use_css,no_foldcolumn,expand_tabs,pre_wrap,prevent_copy=,use_input_for_pc=none">
+<meta name="colorscheme" content="catppuccin_mocha">
+<style>
+<!--
+pre { white-space: pre-wrap; font-family: monospace; color: #cdd6f4; background-color: #000000; }
+body { font-family: monospace; color: #cdd6f4; background-color: #000000; }
+* { font-size: 1em; }
+.Statement { color: #cba6f7; }
+.PreProc { color: #f5c2e7; }
+.String { color: #a6e3a1; }
+.Function { color: #89b4fa; }
+.Include { color: #f5c2e7; }
+-->
+</style>
+</head>
+<body>
+<pre id='vimCodeElement'>
+<span class="Include">from</span> fastapi <span class="Include">import</span> Depends
+<span class="Include">from</span> fastapi.routing <span class="Include">import</span> APIRouter
+<span class="Include">from</span> sqlalchemy.ext.asyncio <span class="Include">import</span> AsyncSession
+
+<span class="Include">from</span> api.deps <span class="Include">import</span> (get_async_session, get_product_repository,
+                      get_order_repository)
+<span class="Include">from</span> api.schemas.products <span class="Include">import</span> (ProductResponseSchema,
+                                  ProductInSellerOrderSchema)
+<span class="Include">from</span> api.schemas.orders <span class="Include">import</span> SellerOrderResponseSchema
+<span class="Include">from</span> api.schemas.sellers <span class="Include">import</span> SellerUpdateProductStatusSchema
+<span class="Include">from</span> models.users <span class="Include">import</span> User, UserRole
+<span class="Include">from</span> models.products <span class="Include">import</span> ProductStatus
+<span class="Include">from</span> repositories.products <span class="Include">import</span> IProductRepository
+<span class="Include">from</span> repositories.orders <span class="Include">import</span> IOrderRepository
+<span class="Include">from</span> services.orders <span class="Include">import</span> (get_seller_sale, get_seller_sales,
+                             get_seller_sale_product, update_product_status)
+<span class="Include">from</span> services.auth <span class="Include">import</span> get_current_active_user
+
+
+router = APIRouter(prefix=<span class="String">'</span><span class="String">/sellers</span><span class="String">'</span>, tags=[<span class="String">'</span><span class="String">sellers</span><span class="String">'</span>])
+
+
+<span class="PreProc">@</span><span class="Function">router.get</span>(<span class="String">'</span><span class="String">/{seller_id}/products</span><span class="String">'</span>)
+<span class="Statement">async</span> <span class="Statement">def</span> <span class="Function">get_seller_products_handler</span>(
+    seller_id: <span class="Function">int</span>,
+    session: AsyncSession = Depends(get_async_session),
+    product_repository: IProductRepository = Depends(get_product_repository),
+) -&gt; <span class="Function">list</span>[ProductResponseSchema]:
+    products = <span class="Statement">await</span> product_repository.get_seller_products(session, seller_id)
+    <span class="Statement">return</span> products
+
+
+<span class="PreProc">@</span><span class="Function">router.get</span>(<span class="String">'</span><span class="String">/sales</span><span class="String">'</span>)
+<span class="Statement">async</span> <span class="Statement">def</span> <span class="Function">get_seller_sales_handler</span>(
+    session: AsyncSession = Depends(get_async_session),
+    order_repository: IOrderRepository = Depends(get_order_repository),
+    current_user: User = Depends(
+        get_current_active_user(required_roles=[UserRole.SELLER])
+    ),
+) -&gt; <span class="Function">list</span>[SellerOrderResponseSchema]:
+    orders = <span class="Statement">await</span> get_seller_sales(
+        order_repository, session, current_user.id)
+    <span class="Statement">return</span> orders
+
+
+<span class="PreProc">@</span><span class="Function">router.get</span>(<span class="String">'</span><span class="String">/sales/{order_id}</span><span class="String">'</span>)
+<span class="Statement">async</span> <span class="Statement">def</span> <span class="Function">get_seller_sale_handler</span>(
+    order_id: <span class="Function">int</span>,
+    session: AsyncSession = Depends(get_async_session),
+    order_repository: IOrderRepository = Depends(get_order_repository),
+    current_user: User = Depends(
+        get_current_active_user(required_roles=[UserRole.SELLER])
+    ),
+) -&gt; SellerOrderResponseSchema:
+    order = <span class="Statement">await</span> get_seller_sale(
+            order_repository, session, current_user.id, order_id)
+    <span class="Statement">return</span> order
+
+
+<span class="PreProc">@</span><span class="Function">router.get</span>(<span class="String">'</span><span class="String">/sales/{order_id}/{product_id}</span><span class="String">'</span>)
+<span class="Statement">async</span> <span class="Statement">def</span> <span class="Function">get_seller_sale_product_handler</span>(
+    order_id: <span class="Function">int</span>,
+    product_id: <span class="Function">int</span>,
+    session: AsyncSession = Depends(get_async_session),
+    orders_repository: IOrderRepository = Depends(get_order_repository),
+    current_user: User = Depends(get_current_active_user(
+        required_roles=[UserRole.SELLER])
+    ),
+) -&gt; ProductInSellerOrderSchema:
+    product = <span class="Statement">await</span> get_seller_sale_product(orders_repository, session,
+                                            current_user.id, order_id,
+                                            product_id)
+    <span class="Statement">return</span> product
+
+<span class="PreProc">@</span><span class="Function">router.patch</span>(<span class="String">'</span><span class="String">/sales/{order_id}/{product_id}</span><span class="String">'</span>)
+<span class="Statement">async</span> <span class="Statement">def</span> <span class="Function">update_product_status_handler</span>(
+    order_id: <span class="Function">int</span>,
+    product_id: <span class="Function">int</span>,
+    status: SellerUpdateProductStatusSchema,
+    session: AsyncSession = Depends(get_async_session),
+    orders_repository: IOrderRepository = Depends(get_order_repository),
+    current_user: User = Depends(get_current_active_user(
+        required_roles=[UserRole.SELLER])
+    ),
+):
+    <span class="Statement">await</span> update_product_status(orders_repository, session, current_user.id,
+                                order_id, product_id, status)
+</pre>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->

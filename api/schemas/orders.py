@@ -2,32 +2,24 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from api.schemas.products import ProductInOrderSchema
+from api.schemas.products import (ProductInSellerOrderSchema,
+                                  ProductInUserOrderSchema)
 from models.orders import OrderStatus
-
-
-class OrderCreateSchema(BaseModel):
-    owner_id: int
 
 
 class OrderCreateResponseSchema(BaseModel):
     id: int
 
 
-class OrderResponseSchema(OrderCreateSchema, OrderCreateResponseSchema):
+class UserOrderResponseSchema(OrderCreateResponseSchema):
     status: OrderStatus
-    content: list[ProductInOrderSchema]
+    content: list[ProductInUserOrderSchema]
+    #total_cost: int
     created_at: datetime
 
 
-class OrderAddItemSchema(BaseModel):
-    product_id: int
-    quantity: int
-
-
-class OrderDeleteItemSchema(BaseModel):
-    product_title: str
-
-
-class OrderUpdateStatusSchema(BaseModel):
+class SellerOrderResponseSchema(OrderCreateResponseSchema):
     status: OrderStatus
+    content: list[ProductInSellerOrderSchema]
+    #total_cost: int
+    created_at: datetime

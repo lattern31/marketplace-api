@@ -1,15 +1,18 @@
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveInt
+
+from models.products import ProductStatus
 
 
 class ProductCreateSchema(BaseModel):
     title: str
-    cost: int
+    cost: PositiveInt
 
 
 class ProductResponseSchema(ProductCreateSchema):
     id: int
+    seller_id: int
     created_at: datetime
 
 
@@ -17,8 +20,16 @@ class ProductCreateResponseSchema(BaseModel):
     id: int
 
 
-class ProductInOrderSchema(BaseModel):
+class ProductInCartSchema(ProductCreateSchema):
     id: int = Field(validation_alias='product_id')
-    title: str
-    cost: int
+    seller_id: int
     quantity: int
+
+
+class ProductInUserOrderSchema(ProductInCartSchema):
+    status: ProductStatus
+
+
+class ProductInSellerOrderSchema(ProductInCartSchema):
+    #address: str
+    status: ProductStatus

@@ -6,6 +6,7 @@ from db.db import async_engine
 from repositories.orders import SQLAOrderRepository
 from repositories.products import SQLAProductRepository
 from repositories.users import SQLAUserRepository
+from repositories.cart import SQLACartRepository
 
 
 async_session = async_sessionmaker(async_engine, expire_on_commit=False)
@@ -29,3 +30,7 @@ def get_product_repository():
 
 def get_order_repository():
     return SQLAOrderRepository()
+
+
+def get_cart_repository():
+    return SQLACartRepository()

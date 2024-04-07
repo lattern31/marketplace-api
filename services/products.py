@@ -5,9 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from repositories.products import IProductRepository
 
 
-async def product_exists(repository: IProductRepository,
-                         session: AsyncSession,
-                         product_id: int) -> None:
+async def check_product_exists(
+    session: AsyncSession,
+    repository: IProductRepository,
+    product_id: int
+) -> None:
     if not await repository.check_exists_by_id(
             session=session, id=product_id):
         error_msg = "product doesn't exist"
@@ -17,9 +19,11 @@ async def product_exists(repository: IProductRepository,
         )
 
 
-async def create_product(repository: IProductRepository,
-                         session: AsyncSession,
-                         title: str,
-                         cost: int) -> int:
+async def create_product(
+    session: AsyncSession,
+    repository: IProductRepository,
+    title: str,
+    cost: int
+) -> int:
     product_id = await repository.create(session, title, cost)
     return product_id

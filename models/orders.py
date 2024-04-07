@@ -1,3 +1,4 @@
+from datetime import datetime
 from enum import auto, StrEnum
 
 from sqlalchemy import ForeignKey
@@ -6,12 +7,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from db.db import Base
 from utils.models_annotations import created_at, intpk
+from models.products import ProductStatus
 
 
 class OrderStatus(StrEnum):
-    PENDING = auto()
-    CHECKOUT = auto()
-    SHIPPING = auto()
+    OPENED = auto()
     COMPLETED = auto()
     CANCELLED = auto()
 
@@ -40,8 +40,11 @@ class OrdersProducts(Base):
         primary_key=True,
     )
     quantity: Mapped[int]
+    status: Mapped[ProductStatus]
     product: Mapped["Product"] = relationship()
     cost: AssociationProxy[int] = association_proxy(
         'product', 'cost')
     title: AssociationProxy[int] = association_proxy(
         'product', 'title')
+    seller_id: AssociationProxy[int] = association_proxy(
+        'product', 'seller_id')
