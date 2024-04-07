@@ -10,7 +10,7 @@ env.read_envfile(BASE_DIR / '.env')
 
 
 class Settings(BaseSettings):
-    secret_key: str = env.str("SECRET_KEY")
+    secret_key: str = env.str("SECRET_KEY", default="SECRET_KEY_FOR_CI")
     debug: bool = env.bool("DEBUG", default=False)
     access_token_expire_minutes: int = env.bool(
         "ACCESS_TOKEN_EXPIRE_MINUTES", default=15
