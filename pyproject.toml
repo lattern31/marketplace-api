@@ -11,8 +11,6 @@ alembic = "^1.12.1"
 sqlalchemy = "^2.0.23"
 fastapi = "^0.104.1"
 asyncpg = "^0.29.0"
-envparse = "^0.2.0"
-pydantic-settings = "^2.1.0"
 uvicorn = "^0.25.0"
 pytest-asyncio = "^0.23.4"
 httpx = "^0.26.0"
@@ -20,6 +18,7 @@ python-multipart = "^0.0.9"
 python-jose = "^3.3.0"
 passlib = "^1.7.4"
 bcrypt = "^4.1.2"
+python-dotenv = "^1.0.1"
 
 
 [build-system]

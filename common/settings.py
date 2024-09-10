@@ -1,32 +1,32 @@
-from envparse import Env
+import dotenv
 import pathlib
-from pydantic_settings import BaseSettings
 
 
 BASE_DIR = pathlib.Path(__file__).parent.parent
 
-env = Env()
-env.read_envfile(BASE_DIR / '.env')
 
+dotenv.load_dotenv(BASE_DIR)
 
-class Settings(BaseSettings):
-    secret_key: str = env.str("SECRET_KEY", default="SECRET_KEY_FOR_CI")
-    debug: bool = env.bool("DEBUG", default=False)
-    access_token_expire_minutes: int = env.bool(
-        "ACCESS_TOKEN_EXPIRE_MINUTES", default=15
+class Settings:
+    secret_key = dotenv.dotenv_values().get("SECRET_KEY", "SECRET_KEY_FOR_CI")
+    debug = dotenv.dotenv_values().get("DEBUG", False)
+    access_token_expire_minutes = dotenv.dotenv_values().get(
+        "ACCESS_TOKEN_EXPIRE_MINUTES", 15
     )
-    algorithm: str = env.str("ALGORITHM", default='HS256')
-    postgres_host: str = env.str("POSTGRES_HOST", default="localhost")
-    postgres_port: int = env.int("POSTGRES_PORT", default=5432)
-    postgres_db: str = env.str("POSTGRES_DB", default="postgres")
-    postgres_user: str = env.str("POSTGRES_USER", default="postgres")
-    postgres_password: str = env.str("POSTGRES_PASSWORD", default="postgres")
+    algorithm = dotenv.dotenv_values().get("ALGORITHM", 'HS256')
+    postgres_host = dotenv.dotenv_values().get("POSTGRES_HOST", "localhost")
+    postgres_port = dotenv.dotenv_values().get("POSTGRES_PORT", 5432)
+    postgres_db = dotenv.dotenv_values().get("POSTGRES_DB", "postgres")
+    postgres_user = dotenv.dotenv_values().get("POSTGRES_USER", "postgres")
+    postgres_password = dotenv.dotenv_values().get("POSTGRES_PASSWORD", "postgres")
     db_string: str = (
         "postgresql+asyncpg://"
         f"{postgres_user}:{postgres_password}"
         f"@{postgres_host}:{postgres_port}/{postgres_db}"
     )
-    postgres_test_port: int = env.int("POSTGRES_TEST_PORT", default=5433)
+    postgres_test_port = dotenv.dotenv_values().get(
+        "POSTGRES_TEST_PORT", 5433
+    )
     db_test_string: str = (
         "postgresql+asyncpg://"
         f"{postgres_user}:{postgres_password}"
@@ -34,4 +34,4 @@ class Settings(BaseSettings):
     )
 
 
-settings = Settings()
+settings = Settings
